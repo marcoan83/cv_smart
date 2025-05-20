@@ -1,7 +1,7 @@
 // File: components/Sidebar.tsx
 
 import Link from 'next/link';
-import useUser from '@/hooks/useUser';
+import useUser from '../hooks/useUser';
 
 export default function Sidebar() {
   const { user } = useUser();
