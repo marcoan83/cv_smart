@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import useUser from '../hooks/useUser';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '../lib/supabaseClient';
 
 export default function Navbar() {
   const { user } = useUser();
