@@ -1,0 +1,3 @@
+# CVSmart
+
+Generated base project.
