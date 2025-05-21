@@ -1,6 +1,7 @@
-// File: pages/pricing.tsx
+// File: /pages/pricing.tsx
 
 import { useState } from 'react';
+import { useUser } from '@/utils/useUser';
 
 const creditPackages = [
   { quantity: 5, price: '€4,99' },
@@ -10,48 +11,51 @@ const creditPackages = [
 ];
 
 export default function Pricing() {
+  const { user } = useUser();
   const [loading, setLoading] = useState<number | null>(null);
 
   const handlePurchase = async (quantity: number) => {
     setLoading(quantity);
 
-    const email = prompt('Inserisci la tua email per procedere al pagamento:');
-    if (!email) {
+    if (!user?.email) {
+      alert('Effettua il login per continuare.');
       setLoading(null);
       return;
     }
 
-    const res = await fetch('/api/checkout', {
+    const response = await fetch('/api/create-checkout-session', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ quantity, email }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        quantity,
+        email: user.email, // email presa automaticamente
+      }),
     });
 
-    const { url } = await res.json();
-    setLoading(null);
-    if (url) {
-      window.location.href = url;
+    const { sessionUrl } = await response.json();
+
+    if (sessionUrl) {
+      window.location.href = sessionUrl;
+    } else {
+      alert('Errore durante il checkout, riprova più tardi.');
+      setLoading(null);
     }
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 p-6">
-      <h1 className="text-3xl font-bold mb-6 text-center">Scegli un pacchetto crediti</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {creditPackages.map((pkg) => (
-          <div key={pkg.quantity} className="border rounded p-4 shadow text-center">
-            <h2 className="text-xl font-semibold mb-2">{pkg.quantity} Crediti</h2>
-            <p className="text-gray-700 mb-4">{pkg.price}</p>
-            <button
-              onClick={() => handlePurchase(pkg.quantity)}
-              disabled={loading === pkg.quantity}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-            >
-              {loading === pkg.quantity ? 'Caricamento...' : 'Acquista'}
-            </button>
-          </div>
-        ))}
-      </div>
+    <div className="flex flex-col items-center">
+      {creditPackages.map(pkg => (
+        <button
+          key={pkg.quantity}
+          onClick={() => handlePurchase(pkg.quantity)}
+          className="m-2 bg-green-500 text-white px-4 py-2 rounded-lg disabled:bg-gray-400"
+          disabled={loading === pkg.quantity}
+        >
+          {loading === pkg.quantity ? 'Caricamento...' : `Compra ${pkg.quantity} crediti - ${pkg.price}`}
+        </button>
+      ))}
     </div>
   );
 }
