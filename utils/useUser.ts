@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/utils/supabaseClient';
+import { Provider } from '@supabase/supabase-js';
 
 export function useUser() {
   const [user, setUser] = useState<any | null>(null);
@@ -23,7 +24,7 @@ export function useUser() {
     };
   }, []);
 
-  const signIn = async ({ provider }: { provider: string }) => {
+  const signIn = async ({ provider }: { provider: Provider }) => {
     await supabase.auth.signInWithOAuth({ provider });
   };
 
@@ -33,4 +34,3 @@ export function useUser() {
 
   return { user, signIn, signOut };
 }
-
